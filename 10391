@@ -1,0 +1,31 @@
+import java.util.*;
+public class CompoundWordsFind{ 
+    public static void main(String[] args){
+        HashMap<String, Integer> map = new HashMap<String,Integer>();
+        List<String> compoundWords = new ArrayList<String>(); // ???
+        
+        // Initialize the map
+        map.put("hala",1);
+        map.put("ha",1);
+        map.put("la",1);
+        map.put("LaLa",1);
+        map.put("La",1);
+        
+        // Find compound word: if substrings are in the map, the word is compound word.
+        String word,front, behind;
+        for (Map.Entry<String, Integer> entry : map.entrySet()){
+            word = entry.getKey();
+            for (int i=1; i< word.length(); i++){
+                front = word.substring(0,i);
+                behind = word.substring(i); 
+                if (map.containsKey(front) && map.containsKey(behind)) 
+                compoundWords.add(word);
+            }
+        }
+        
+        // Print out compound word
+        for (int i=0; i<compoundWords.size();i++){
+            System.out.println(compoundWords.get(i));
+        }
+    }
+}
