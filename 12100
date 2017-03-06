@@ -2,4 +2,49 @@
 计算当前任务打印完成的时刻。每个任务的打印都是需要1分钟。
 思路 ： 类似于优先级队列，但是不一样。设置一个数组记录优先级并由大到小排序，然后模拟执行。开始想用优先队列，但是感觉很麻烦，需要写comparator，还有如果
 使用优先队列的话，出队的是优先级最高的，而不是像题目中所说的，优先级不是最高的也可以出队，并放在队尾；
-cited：http://blog.csdn.net/crazy__chen/article/details/43602349
+cited：参考了 http://blog.csdn.net/crazy__chen/article/details/43602349 但他没有考虑打印时间还有记录原来任务下标
+/* UVa 12100 */
+import java.util.*;
+public class PrinterQueue{
+    public static void main(String[] args){
+        
+        Queue<Integer> queue = new LinkedList<Integer>(); // use linkedlist save the queue
+        Queue<Integer> idx = new LinkedList<Integer>(); // save the original index
+        Integer[] P = new Integer[10]; // save the order
+        int time = 1;
+        
+        // 随机产生优先级
+        Random r = new Random();
+        for (int i=0; i<10; i++ ){
+            Integer num = new Integer(r.nextInt(10));
+            queue.add(num);
+            idx.add(i);
+            P[i] = num;
+        }
+        Arrays.sort(P,Collections.reverseOrder()); // reveseOrder
+        
+        System.out.println(queue);
+        System.out.println(Arrays.toString(P));
+        
+        int head = 0;
+        // print queue
+        while(!queue.isEmpty()){
+            int first = queue.element();
+            int firstidx = idx.element(); 
+            if (first>=P[head]) {
+                System.out.println(firstidx+":"+first+" time: "+time);
+                queue.remove();
+                idx.remove();
+                head++;
+                time++;
+            }
+            else{
+                System.out.println(firstidx+":"+first+"置于队尾");
+                queue.add(first);
+                queue.remove();
+                idx.add(firstidx);
+                idx.remove();
+            }
+        }
+    }
+}
