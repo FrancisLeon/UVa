@@ -1,0 +1,133 @@
+/* UVa 210
+  idea:
+  while(等待队列中还有程序){
+
+　　while(还有配额){
+
+　　　　if(执行完这条语句就没有配额了)　　换下一个程序，将此程序放到队末
+
+　　　　if(这条语句是 lock){
+
+　　　　　　if(当前处于锁定状态)　　将此程序加入阻止队列，换下一个程序
+
+　　　　　　if(当前不处于锁定状态)　　将状态改为锁定状态
+
+　　　　}
+
+　　　　这条语句一定执行了，将配额减少
+
+　　　　if(是赋值语句)　　进行赋值
+
+　　　　if(是输出语句)　　进行输出
+
+　　　　if(是 unlock 语句){
+
+　　　　　　将状态改为非锁定状态
+
+　　　　　　if(阻止队列中还有程序)　　将阻止队列队首的程序放到等待队列队首。
+
+　　　　}
+
+　　}
+
+}
+ */
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main(){
+   static int[] time = new int[129];         // time for 5 codes
+   static int[] ch = new int[26];            // variables
+   public static void main(String[] args){
+       Scanner scan = new Scanner(System.in);
+       int T = scan.nextInt();
+       while(T--!=0){
+           Arrays.fill(time,0);             // Initialize time
+           Arrays.fill(ch,0);
+           int n = scan.nextInt();          // Scan in the ints
+           int t1 = scan.nextInt();
+           int t2 = scan.nextInt();
+           int t3 = scan.nextInt();
+           int t4 = scan.nextInt();
+           int t5 = scan.nextInt();
+           int Q = scan.nextInt();
+           
+           time['='] = t1;                // var '=' constant
+           time['i'] = t2;                // pr'i'nt var
+           time['c'] = t3;                // lo'c'k
+           time['l'] = t4;                // un'l'ock
+           time['d'] = t5;                // en'd'
+           
+           scan.nextLine();
+           
+           Deque<Program> wait = new LinkedList<>();    // Wait deque for the programs 
+           Queue<Program> stop = new LinkedList<>();    // Stop queue for the programs locks 
+           for (int i=1;i<=n;i++){                      // Scan in the programs
+               Program program = new Program();
+               program.number = i;
+               while(true){
+                   String s = scan.nextLine();
+                   program.code.add(s);
+                   if ("end".equals(s)) break;
+               }
+               wait.add(program);
+           }   
+           
+           boolean isLock = false;
+           while(!wait.isEmpty()){
+               Program program = wait.poll(); // 相当于先get然后再remove掉
+               int t = Q;
+               while(!program.code.isEmpty()){
+                   if (t <= 0){
+                       wait.add(program);
+                       break;
+                   }
+                   String s = program.code.peek(); // peek()表示的是查看堆栈顶部的对象,但不从堆栈中移除它
+                   if (s.charAt(2) == 'c'){  // lock
+                       if (isLock){
+                           stop.add(program);
+                           break;
+                       }else{
+                           isLock = true;
+                       }
+                       
+                    // run the code 
+                    t -= time[s.charAt(2)];
+                    program.code.poll();
+                       
+                    if (s.charAt(2)=='='){ // var = constant
+                        char c = s.charAt(0);
+                        int num  = Integer.parseInt(s.substring(4)); // static int parseInt(String s);
+                                                                     // This returns an integer (decimal only)
+                        ch[c-'a'] = num;
+                    }
+                    if (s.charAt(2)=='d'){// end
+                        break;
+                    }
+                    if (s.charAt(2)=='l'){ // unlock
+                        isLock = false;
+                        if (!stop.isEmpty()){
+                            wait.addFirst(stop.poll());
+                        }
+                    }
+                    if (s.charAt(2)=='i'){ // print
+                        char c = s.charAt(6);
+                        System.out.println(program.number+":"+ch[c-'a']);
+                    }
+                   }
+               }
+               if (T != 0){
+                   System.out.println();
+               }
+           }
+       }
+       
+       static class Program{    
+           int number;
+           Queue<String> code = new LinkedList<>();
+       }
+   }
+}
